@@ -42,12 +42,44 @@ class BoggleAppTestCase(TestCase):
 
         with self.client as client:
             response = client.post("/api/new-game")
-            json = response.get_data(as_text=True)
+            json = response.json
 
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(response.is_json)
-            self.assertIn("gameId" and "board", json)
-            self.assertFalse(len(games) == 0)
+            self.assertTrue(json['gameId'])
+            self.assertTrue(type(json['board']) is list)
+            self.assertTrue(type(json['board'][0])is list)
+            self.assertIn(json['gameId', games])
             # write a test for this route
+
+    def test_api_score_word(self):
+        """Testing the score-word endpoint"""
+
+        with self.client as client:
+            new_game_response = client.post("/api/new-game")
+            json_response = new_game_response.get_json()
+            response_id = json_response['gameId']
+            game = games[response_id]
+
+            game.board[0] = ['A', 'P', 'P', 'L', 'E']
+            game.board[1] = ['Z', 'Z', 'Z', 'Z', 'Z']
+            game.board[2] = ['Z', 'Z', 'Z', 'Z', 'Z']
+            game.board[3] = ['Z', 'Z', 'Z', 'Z', 'Z']
+            game.board[4] = ['Z', 'Z', 'Z', 'Z', 'Z']
+
+            check_word_response = client.post("/api/score-word",
+            json={"gameId" : response_id, "word" : 'APPLE'})
+            check_word_response_json = check_word_response.get_json()
+            self.assertEqual(check_word_response_json, {'result': 'ok'})
+
+            check_word_response = client.post("/api/score-word",
+            json={"gameId" : response_id, "word" : 'TACO'})
+            check_word_response_json = check_word_response.get_json()
+            self.assertEqual(check_word_response_json, {'result': 'not-on-board'})
+
+            check_word_response = client.post("/api/score-word",
+            json={"gameId" : response_id, "word" : 'FDSH'})
+            check_word_response_json = check_word_response.get_json()
+            self.assertEqual(check_word_response_json, {'result': 'not-word'})
+
 
 
