@@ -47,7 +47,7 @@ def is_word_legal():
     """{gameId: someID, word: some_word}"""
     request_data = request.get_json()
     gameId = request_data["gameId"]
-    word = request_data["word"]
+    word = request_data["word"].upper()
     game = games[gameId]
 
     if not game.is_word_in_word_list(word):
